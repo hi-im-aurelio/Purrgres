@@ -1,4 +1,4 @@
-<img width="150px" src="https://github.com/fariosofernando/owl-experimental/raw/master/static/icone.webp">
+<img width="150px" src="https://github.com/hi-im-aurelio/purrgres/raw/master/static/icone.webp">
 
 # Purrgres - Backup Tool for PostgreSQL
 
