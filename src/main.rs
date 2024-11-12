@@ -1,5 +1,6 @@
 use chrono::Local;
 use clap::{command, Parser};
+use colored::*;
 use std::fs;
 use std::process::Command;
 use std::time::Duration;
@@ -38,18 +39,34 @@ async fn main() {
     }
 
     if args.stats {
+        println!("{}", "=== Status do Purrgres ===".bold().underline());
+
         match utils::process::check_process_status() {
-            Some(pid) => println!("Backup está em execução (PID: {})", pid),
-            None => println!("Backup não está em execução."),
+            Some(pid) => {
+                let elapsed_time = utils::process::get_process_uptime(pid);
+                println!("Backup em execução: {}", format!("PID: {}", pid).green());
+                println!("Tempo de execução: {}", elapsed_time.yellow());
+            }
+            None => {
+                println!("{}", "Backup não está em execução.".red());
+            }
         }
+
+        println!("{}", "=".repeat(25).bold());
+
         return;
     }
 
     if args.stop {
+        println!("=== Parando o Backup ===");
         match utils::process::stop_process() {
-            Ok(_) => println!("Processo de backup parado."),
+            Ok(_) => {
+                println!("Processo de backup parado.");
+                utils::process::clear_pid();
+            }
             Err(e) => eprintln!("Erro ao parar o processo: {}", e),
         }
+        println!("=========================");
         return;
     }
 
@@ -88,6 +105,7 @@ async fn main() {
 
         if output.status.success() {
             fs::write(&file_name, output.stdout).expect("Falha ao salvar o arquivo de backup");
+            println!("=== Backup Concluído ===");
             println!("Backup salvo em {}", file_name);
         } else {
             eprintln!(
@@ -95,7 +113,5 @@ async fn main() {
                 String::from_utf8_lossy(&output.stderr)
             );
         }
-
-        // utils::process::clear_pid();
     }
 }
