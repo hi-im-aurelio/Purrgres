@@ -1,3 +1,5 @@
+<img width="150px" src="https://github.com/fariosofernando/owl-experimental/raw/master/static/icone.webp">
+
 # Purrgres - Backup Tool for PostgreSQL
 
 Purrgres is an automated PostgreSQL backup tool, specially tailored for environments using Docker containers. It allows you to perform daily backups of your PostgreSQL database, restore specific backups, and view the history of backups performed. With automatic intervals every 24 hours, Purrgres reduces the manual effort to ensure data security and recovery.
