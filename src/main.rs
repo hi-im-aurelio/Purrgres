@@ -1,5 +1,5 @@
 use chrono::Local;
-use clap::{command, Parser};
+use clap::Parser;
 use colored::*;
 use std::fs;
 use std::process::Command;
@@ -8,29 +8,9 @@ use tokio::time;
 
 mod utils;
 
-#[derive(Parser, Debug)]
-#[command(name = "purrgres")]
-#[command(about = "Uma ferramenta de backup automática para PostgreSQL em contêineres Docker.")]
-struct Args {
-    #[arg(short, long, help = "Usuário do PostgreSQL", required_unless_present_any = ["stats", "stop"])]
-    user: Option<String>,
-
-    #[arg(short, long, help = "Nome do banco de dados", required_unless_present_any = ["stats", "stop"])]
-    database: Option<String>,
-
-    #[arg(short, long, help = "Nome do container", required_unless_present_any = ["stats", "stop"])]
-    container: Option<String>,
-
-    #[arg(long, help = "Verifica o status do backup em execução.")]
-    stats: bool,
-
-    #[arg(long, help = "Para o processo de backup")]
-    stop: bool,
-}
-
 #[tokio::main]
 async fn main() {
-    let args = Args::parse();
+    let args = utils::args_struct::Args::parse();
 
     let tool_path = utils::path::get_bkp_path();
 
@@ -66,6 +46,20 @@ async fn main() {
             }
             Err(e) => eprintln!("Erro ao parar o processo: {}", e),
         }
+        println!("=========================");
+        return;
+    }
+
+    if args.list_purrs {
+        utils::process::list_backups(&tool_path);
+        return;
+    }
+
+    if let Some(backup_file) = args.rpurry.as_ref() {
+        println!("=== Restaurando backup de: {} === ", backup_file);
+
+        utils::process::apply_backup(backup_file, &args);
+
         println!("=========================");
         return;
     }
