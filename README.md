@@ -4,6 +4,9 @@
 
 Purrgres is an automated PostgreSQL backup tool, specially tailored for environments using Docker containers. It allows you to perform daily backups of your PostgreSQL database, restore specific backups, and view the history of backups performed. With automatic intervals every 24 hours, Purrgres reduces the manual effort to ensure data security and recovery.
 
+> Purrgres is a play on Postgres, but with a “purr” feel, as if it were
+> a kitten taking care of the bank.
+
 ## Features
 
 -   **Automatic backup**: Performs backups of a PostgreSQL database in an automated way.
@@ -16,7 +19,41 @@ Purrgres is an automated PostgreSQL backup tool, specially tailored for environm
 
 ### Download Binary
 
-You can download the compiled version of `purrgres` for your operating system directly from the releases section of the [repository](https://github.com/hi-im-aurelio/purrgres/releases). There is no need to compile the source code manually if you are a Linux user.
+Binaries are made available with each release for Linux operating systems, you can download the compiled version of `purrgres` for your operating
+system directly from the releases section of the [repository](https://github.com/hi-im-aurelio/purrgres/releases). There is no need to compile the
+source code manually if you are a Linux user.
+
+Once downloaded, unpack the file:
+
+```bash
+    tar -xvf /<you-download-path>/purrgres*.tar.gz
+```
+
+Check for the execution bit:
+
+```bash
+    chmod +x purrgres
+```
+
+And then execute Purrgres:
+
+```bash
+    ./purrgres
+```
+
+Include the directory Purrgres is in, in your PATH Variable if you wish to be able to execute it anywhere.
+
+Bash:
+
+```bash
+    echo 'export PATH=$PATH:~/<your-download-path>/purrgres' >> ~/.bashrc
+```
+
+Zsh:
+
+```bash
+    echo 'export PATH=$PATH:~/<your-download-path>/purrgres' >> ~/.zshrc
+```
 
 ### Use via Command Line
 
