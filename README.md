@@ -46,13 +46,13 @@ Include the directory Purrgres is in, in your PATH Variable if you wish to be ab
 Bash:
 
 ```bash
-    echo 'export PATH=$PATH:~/<your-download-path>/purrgres' >> ~/.bashrc
+    echo 'export PATH="$PATH":"$HOME/<purrgres-path>"' >> ~/.bashrc
 ```
 
 Zsh:
 
 ```bash
-    echo 'export PATH=$PATH:~/<your-download-path>/purrgres' >> ~/.zshrc
+    echo 'export PATH="$PATH":"$HOME/<purrgres-path>"' >> ~/.zshrc
 ```
 
 ### Use via Command Line
