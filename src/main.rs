@@ -15,20 +15,20 @@ async fn main() {
     let tool_path = utils::path::get_bkp_path();
 
     if !tool_path.exists() {
-        fs::create_dir_all(&tool_path).expect("Falha ao criar o diretório de backup.");
+        fs::create_dir_all(&tool_path).expect("Failed to create backup directory");
     }
 
     if args.stats {
-        println!("{}", "=== Status do Purrgres ===".bold().underline());
+        println!("{}", "=== Status purrgres ===".bold().underline());
 
         match utils::process::check_process_status() {
             Some(pid) => {
                 let elapsed_time = utils::process::get_process_uptime(pid);
-                println!("Backup em execução: {}", format!("PID: {}", pid).green());
-                println!("Tempo de execução: {}", elapsed_time.yellow());
+                println!("Backup running: {}", format!("PID: {}", pid).green());
+                println!("Execution time: {}", elapsed_time.yellow());
             }
             None => {
-                println!("{}", "Backup não está em execução.".red());
+                println!("{}", "Backup is not running".red());
             }
         }
 
@@ -38,13 +38,13 @@ async fn main() {
     }
 
     if args.stop {
-        println!("=== Parando o Backup ===");
+        println!("=== Stopping the backup ===");
         match utils::process::stop_process() {
             Ok(_) => {
-                println!("Processo de backup parado.");
+                println!("Backup process stopped");
                 utils::process::clear_pid();
             }
-            Err(e) => eprintln!("Erro ao parar o processo: {}", e),
+            Err(e) => eprintln!("Error stopping the process: {}", e),
         }
         println!("=========================");
         return;
@@ -56,7 +56,7 @@ async fn main() {
     }
 
     if let Some(backup_file) = args.rpurry.as_ref() {
-        println!("=== Restaurando backup de: {} === ", backup_file);
+        println!("=== Restoring backup from: {} === ", backup_file);
 
         utils::process::apply_backup(backup_file, &args);
 
@@ -79,31 +79,25 @@ async fn main() {
         let output = Command::new("docker")
             .args(&[
                 "exec",
-                &args
-                    .container
-                    .clone()
-                    .expect("Necessário prover nome do container"),
+                &args.container.clone().expect("Container name required"),
                 "pg_dump",
                 "-U",
-                &args
-                    .user
-                    .clone()
-                    .expect("Necessario prover o nome do usuário"),
-                &args.database.clone().expect("Necessário prover o banco"),
+                &args.user.clone().expect("Database user required"),
+                &args.database.clone().expect("Database name required"),
             ])
             .output()
-            .expect("Falha ao executar o comando pg_dump");
+            .expect("Failed to execute the pg_dump command");
 
         let pid = std::process::id();
         utils::process::save_pid(pid);
 
         if output.status.success() {
-            fs::write(&file_name, output.stdout).expect("Falha ao salvar o arquivo de backup");
-            println!("=== Backup Concluído ===");
-            println!("Backup salvo em {}", file_name);
+            fs::write(&file_name, output.stdout).expect("Failed save the backup file");
+            println!("=== Backup complete ===");
+            println!("Backup saved in: {}", file_name);
         } else {
             eprintln!(
-                "Erro ao realizar o backup: {:?}",
+                "Error make backup: {:?}",
                 String::from_utf8_lossy(&output.stderr)
             );
         }

@@ -2,26 +2,26 @@ use clap::{command, Parser};
 
 #[derive(Parser, Debug)]
 #[command(name = "purrgres")]
-#[command(about = "Uma ferramenta de backup automática para PostgreSQL em contêineres Docker.")]
+#[command(about = "An automatic backup tool for PostgreSQL in Docker containers.")]
 pub struct Args {
-    #[arg(short, long, help = "Usuário do PostgreSQL", required_unless_present_any = ["stats", "stop", "list_purrs"])]
+    #[arg(short, long, help = "PostgreSQL User", required_unless_present_any = ["stats", "stop", "list_purrs"])]
     pub user: Option<String>,
 
-    #[arg(short, long, help = "Nome do banco de dados", required_unless_present_any = ["stats", "stop", "list_purrs"])]
+    #[arg(short, long, help = "Database name", required_unless_present_any = ["stats", "stop", "list_purrs"])]
     pub database: Option<String>,
 
-    #[arg(short, long, help = "Nome do container", required_unless_present_any = ["stats", "stop", "list_purrs"])]
+    #[arg(short, long, help = "Container name", required_unless_present_any = ["stats", "stop", "list_purrs"])]
     pub container: Option<String>,
 
-    #[arg(long, help = "Verifica o status do backup em execução.")]
+    #[arg(long, help = "Checks the status of the running backup.")]
     pub stats: bool,
 
-    #[arg(long, help = "Para o processo de backup")]
+    #[arg(long, help = "Stops the backup process")]
     pub stop: bool,
 
-    #[arg(long, help = "Lista os backups realizados")]
+    #[arg(long, help = "List the backups performed")]
     pub list_purrs: bool,
 
-    #[arg(long, help = "Aplica um backup a partir de um arquivo")]
+    #[arg(long, help = "Applies a backup from a file")]
     pub rpurry: Option<String>,
 }

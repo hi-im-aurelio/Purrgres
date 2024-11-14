@@ -17,15 +17,15 @@ pub fn stop_process() -> Result<(), String> {
         let output = Command::new("kill")
             .arg(pid.to_string())
             .output()
-            .map_err(|e| format!("Falha ao parar o processo: {}", e))?;
+            .map_err(|e| format!("Failed to stop process: {}", e))?;
 
         if output.status.success() {
             Ok(())
         } else {
-            Err("Falha ao matar o processo.".to_string())
+            Err("Failed to kill process.".to_string())
         }
     } else {
-        Err("Nenhum processo de backup encontrado.".to_string())
+        Err("No backup processes found.".to_string())
     }
 }
 
@@ -39,25 +39,25 @@ pub fn check_process_status() -> Option<u32> {
 }
 
 pub fn clear_pid() {
-    fs::remove_file(get_pid_file_path()).expect("Falha ao remover arquivo PID");
+    fs::remove_file(get_pid_file_path()).expect("Failed to remove a PID file");
 }
 
 pub fn save_pid(pid: u32) {
     let pid_file_path = get_bkp_path().join("purrgres_pid");
     let mut file = File::create(&pid_file_path)
-        .map_err(|e| format!("Falha ao criar o arquivo PID: {}", e))
-        .expect("Erro ao criar o arquivo PID");
+        .map_err(|e| format!("Failed to create a PID file: {}", e))
+        .expect("Failed to create a PID file");
 
-    write!(file, "{}", pid).expect("Falha ao escrever PID no arquivo");
+    write!(file, "{}", pid).expect("Failed to write PID to file");
 
-    println!("Salvando PID: {}", pid);
+    println!("Saving PID: {}", pid);
 }
 
 pub fn get_process_uptime(pid: u32) -> String {
     let start_time = Command::new("ps")
         .args(&["-p", &pid.to_string(), "-o", "lstart="])
         .output()
-        .expect("Falha ao obter o tempo de início do processo");
+        .expect("Failed to get process start time");
 
     if start_time.status.success() {
         let start_time_str = String::from_utf8_lossy(&start_time.stdout);
@@ -109,10 +109,10 @@ pub fn get_process_uptime(pid: u32) -> String {
 
                 format!("{}h {}m {}s", hours, minutes, seconds)
             }
-            Err(_) => "Não foi possível calcular o tempo.".to_string(),
+            Err(_) => "Unable to calculate time".to_string(),
         }
     } else {
-        "Não foi possível calcular o tempo.".to_string()
+        "Unable to calculate time".to_string()
     }
 }
 
@@ -123,21 +123,19 @@ pub fn apply_backup(backup_file: &str, args: &Args) {
             get_bkp_path()
                 .join(backup_file)
                 .to_str()
-                .expect("Falha ao obter o caminho do arquivo de backup"),
+                .expect("Failed to get backup file path"),
             &format!(
                 "{}:/tmp/{}",
-                args.container
-                    .clone()
-                    .expect("Necessário prover nome do container"),
+                args.container.clone().expect("Container name required"),
                 backup_file
             ),
         ])
         .output()
-        .expect("Falha ao copiar o arquivo de backup para o contêiner");
+        .expect("Failed to copy backup file to containe");
 
     if !copy_output.status.success() {
         eprintln!(
-            "Erro ao copiar o arquivo para o contêiner: {:?}",
+            "Error copying file to container: {:?}",
             String::from_utf8_lossy(&copy_output.stderr)
         );
         return;
@@ -146,55 +144,46 @@ pub fn apply_backup(backup_file: &str, args: &Args) {
     let output = Command::new("docker")
         .args(&[
             "exec",
-            &args
-                .container
-                .clone()
-                .expect("Necessário prover nome do container"),
+            &args.container.clone().expect("Container name required"),
             "psql",
             "-U",
-            &args
-                .user
-                .clone()
-                .expect("Necessário prover nome do usuário"),
+            &args.user.clone().expect("Database user required"),
             "-d",
-            &args
-                .database
-                .clone()
-                .expect("Necessário prover nome do banco"),
+            &args.database.clone().expect("Database name requierd"),
             "-f",
             &format!("/tmp/{}", backup_file), // isto deve usar o caminho do proprio container.
         ])
         .output()
-        .expect("Falha ao executar o comando psql");
+        .expect("Failed to execute psql command");
 
     if output.status.success() {
-        println!("Backup restaurado com sucesso!");
+        println!("Backup restored successfully");
 
         let log_file = get_bkp_path().join(".purrs");
         let mut log = fs::OpenOptions::new()
             .append(true)
             .create(true)
             .open(log_file)
-            .expect("Falha ao abrir o arquivo de log");
+            .expect("Failed to open PID file");
 
         let now = chrono::Local::now();
         writeln!(
             log,
-            "Backup restaurado de: {} - Data: {}",
+            "Backup restored form: {} - Date: {}",
             backup_file,
             now.format("%d/%m/%Y %H:%M")
         )
-        .expect("Falha ao escrever no log");
+        .expect("Failed to write a PID file");
     } else {
         eprintln!(
-            "Erro ao restaurar o backup: {:?}",
+            "Error restoring backup: {:?}",
             String::from_utf8_lossy(&output.stderr)
         );
     }
 }
 
 pub fn list_backups(tool_path: &Path) {
-    let entries = fs::read_dir(tool_path).expect("Falha ao ler o diretório de backups");
+    let entries = fs::read_dir(tool_path).expect("Failed to read backup directory");
 
     let mut backups = vec![];
     let last_restored = read_last_restored();
@@ -203,8 +192,8 @@ pub fn list_backups(tool_path: &Path) {
         if let Ok(entry) = entry {
             let path = entry.path();
             if path.is_file() && path.extension() == Some(std::ffi::OsStr::new("sql")) {
-                let metadata = fs::metadata(&path).expect("Erro ao obter metadados do arquivo");
-                let created = metadata.created().expect("Erro ao obter data de criação");
+                let metadata = fs::metadata(&path).expect("Error getting file metadata");
+                let created = metadata.created().expect("Error getting creation date");
 
                 if let Ok(duration_since_epoch) = created.duration_since(SystemTime::UNIX_EPOCH) {
                     let created_naive = NaiveDateTime::from_timestamp(
@@ -226,7 +215,7 @@ pub fn list_backups(tool_path: &Path) {
                     }
                 } else {
                     eprintln!(
-                        "Erro ao calcular a duração desde a época para o arquivo: {}",
+                        "Error calculating duration since epoch for file: {}",
                         path.display()
                     );
                 }
@@ -237,12 +226,12 @@ pub fn list_backups(tool_path: &Path) {
     println!("======================================================================");
     println!(
         "{:<27} | {:<20} | {:<20}",
-        "   ARQUIVOS", "   DATA", "ÚLTIMO RESTAURADO"
+        "   backups", "   date", "restore point"
     );
     println!("======================================================================");
 
     for (file, time, is_last_restored) in backups {
-        let last_restored_label = if is_last_restored { "SIM" } else { "NÃO" };
+        let last_restored_label = if is_last_restored { "last" } else { "" };
         println!("{:<20} | {:<20} | {:<20}", file, time, last_restored_label);
     }
 
@@ -263,7 +252,7 @@ fn read_last_restored() -> Option<String> {
         }
     }
 
-    println!("Foi impossível abrir o arquivo dos purrs");
+    println!("It was impossible to open the purrs file");
 
     None
 }
