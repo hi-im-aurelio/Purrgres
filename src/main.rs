@@ -89,8 +89,8 @@ async fn main() {
         }
     }
 
-    let mut interval = time::interval(Duration::from_secs(86400));
-
+    let schedule = utils::schedule::Schedule::OneDay;
+    let mut interval = time::interval(schedule.to_duration());
     loop {
         interval.tick().await;
 
