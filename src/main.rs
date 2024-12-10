@@ -7,6 +7,7 @@ use std::time::Duration;
 use tokio::time;
 
 mod utils;
+use utils::process_identifier as PID;
 
 #[tokio::main]
 async fn main() {
@@ -21,9 +22,9 @@ async fn main() {
     if args.stats {
         println!("{}", "=== Status purrgres ===".bold().underline());
 
-        match utils::process::check_process_status() {
+        match PID::status() {
             Some(pid) => {
-                let elapsed_time = utils::process::get_process_uptime(pid);
+                let elapsed_time = PID::get_process_uptime(pid);
                 println!("Backup running: {}", format!("PID: {}", pid).green());
                 println!("Execution time: {}", elapsed_time.yellow());
             }
@@ -39,10 +40,10 @@ async fn main() {
 
     if args.stop {
         println!("=== Stopping the backup ===");
-        match utils::process::stop_process() {
+        match PID::stop_process() {
             Ok(_) => {
                 println!("Backup process stopped");
-                utils::process::clear_pid();
+                PID::kill();
             }
             Err(e) => eprintln!("Error stopping the process: {}", e),
         }
@@ -62,6 +63,30 @@ async fn main() {
 
         println!("=========================");
         return;
+    }
+
+    let pid_file_path = utils::path::get_bkp_path().join("purrgres_pid");
+    if pid_file_path.exists() {
+        let pid = match fs::read_to_string(&pid_file_path) {
+            Ok(content) => content
+                .trim()
+                .parse::<u32>()
+                .expect("Failed to parse PID from file"),
+            Err(e) => {
+                eprintln!("Error reading PID file: {}", e);
+                std::process::exit(1);
+            }
+        };
+
+        if PID::process_exists(pid) {
+            eprintln!("A purrgres process is already active with PID: {}", pid);
+            std::process::exit(1);
+        } else {
+            // se o arquivo pid existir, mas não for valido, deve-se remove
+            if let Err(e) = fs::remove_file(&pid_file_path) {
+                eprintln!("Error removing obsolete PID file: {}", e);
+            }
+        }
     }
 
     let mut interval = time::interval(Duration::from_secs(86400));
@@ -89,7 +114,7 @@ async fn main() {
             .expect("Failed to execute the pg_dump command");
 
         let pid = std::process::id();
-        utils::process::save_pid(pid);
+        PID::save_pid(pid);
 
         if output.status.success() {
             fs::write(&file_name, output.stdout).expect("Failed save the backup file");
