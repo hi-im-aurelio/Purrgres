@@ -3,7 +3,6 @@ use clap::Parser;
 use colored::*;
 use std::fs;
 use std::process::Command;
-use std::time::Duration;
 use tokio::time;
 
 mod utils;

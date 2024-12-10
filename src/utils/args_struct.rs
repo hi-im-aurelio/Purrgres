@@ -3,6 +3,7 @@ use clap::{command, Parser};
 #[derive(Parser, Debug)]
 #[command(name = "purrgres")]
 #[command(about = "An automatic backup tool for PostgreSQL in Docker containers.")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 pub struct Args {
     #[arg(short, long, help = "PostgreSQL User", required_unless_present_any = ["stats", "stop", "list_purrs"])]
     pub user: Option<String>,
