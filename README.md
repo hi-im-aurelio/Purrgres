@@ -9,11 +9,27 @@ Purrgres is an automated PostgreSQL backup tool, specially tailored for environm
 
 ## Features
 
--   **Automatic backup**: Performs backups of a PostgreSQL database in an automated way.
--   **Restore backups**: You can restore backups directly from the file.
--   **List backups**: Displays the list of backups performed, including date and time.
--   **Check backup status**: Monitor the status of the running backup process.
--   **Stop running backup**: Stop the backup process if necessary.
+- **Automatic backup**: Performs backups of a PostgreSQL database in an automated way.
+- **Restore backups**: You can restore backups directly from the file.
+- **List backups**: Displays the list of backups performed, including date and time.
+- **Check backup status**: Monitor the status of the running backup process.
+- **Stop running backup**: Stop the backup process if necessary.
+
+## Semantic Versioning
+
+This project follows [Semantic Versioning (SemVer)](https://semver.org/lang/en-US/), ensuring that versions are consistent and transparent. The version number is composed of three parts:
+
+- **MAJOR**: Incompatible API changes that may break backwards compatibility.
+- **MINOR**: Feature additions in a backwards compatible way.
+- **PATCH**: Bug fixes and performance improvements, without significant API changes.
+
+### Example:
+
+- `1.0.0` - First stable release.
+- `0.1.0` - New features added in a backwards compatible way.
+- `0.1.1` - Bug fixes.
+
+Version transitions will be done according to SemVer principles, and any significant updates will be reflected in the version number.
 
 ## How to Use
 
@@ -102,11 +118,11 @@ When you run the command directly, the process will run in the foreground in the
 
 ### When to use:
 
--   Ideal for quick tests or when you want to monitor the execution
-    of the program directly in the terminal.
+- Ideal for quick tests or when you want to monitor the execution
+  of the program directly in the terminal.
 
--   Useful when you want to interact with the program and observe log
-    messages or results in real time.
+- Useful when you want to interact with the program and observe log
+  messages or results in real time.
 
 2. **Background Execution (with nohup)**
 
@@ -118,11 +134,11 @@ Running with nohup allows the program to run in the background. The nohup (no ha
 
 ### When to use:
 
--   Ideal for long or automatic backups that need to be executed continuously, without interfering with your interaction with the terminal.
+- Ideal for long or automatic backups that need to be executed continuously, without interfering with your interaction with the terminal.
 
--   Necessary when you want to run the process in the background and continue using the terminal for other activities.
+- Necessary when you want to run the process in the background and continue using the terminal for other activities.
 
--   Useful for running the program on a remote server where you do not want to lose the backup execution if the SSH session is disconnected.
+- Useful for running the program on a remote server where you do not want to lose the backup execution if the SSH session is disconnected.
 
 Main Differences
 
